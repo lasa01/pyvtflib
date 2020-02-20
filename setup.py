@@ -5,7 +5,7 @@ with open("README.md", encoding='utf-8') as fh:
 
 setuptools.setup(
     name="pyvtflib",
-    version="0.1.0",
+    version="0.2.0",
     author="Lassi Säike",
     description="Python bindings for VTFLib",
     long_description=long_description,
@@ -16,7 +16,7 @@ setuptools.setup(
         "pyvtflib": ["bin/x64/VTFLib.dll", "bin/x86/VTFLib.dll"],
     },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Microsoft :: Windows",
