@@ -572,7 +572,7 @@ class VTFLib():
     def __enter__(self) -> 'VTFLib':
         return self
 
-    def __exit__(self) -> None:
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         self.close()
 
     @staticmethod
