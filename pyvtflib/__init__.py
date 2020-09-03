@@ -1,7 +1,8 @@
 from ctypes import CDLL, CFUNCTYPE, POINTER, Structure, byref, pointer, create_string_buffer, string_at, cast
 from ctypes import c_uint, c_char_p, c_bool, c_int, c_float, c_ubyte, c_void_p
 from enum import IntEnum, IntFlag
-from os import path
+import os
+from os import path, fsencode, fsdecode
 from typing import Callable, Any, Tuple
 import sys
 
@@ -372,8 +373,13 @@ class VLSeekMode(_CEnum):
     SEEK_MODE_END = 2
 
 
-_is_64 = sys.maxsize > 2**32
-_library_path = path.join(path.dirname(__file__), "bin", "x64" if _is_64 else "x86", "VTFLib.dll")
+if os.name == 'posix':
+    _library_path = path.join(path.dirname(__file__), "bin", "libVTFLib13.so")
+elif os.name == 'nt':
+    _is_64 = sys.maxsize > 2**32
+    _library_path = path.join(path.dirname(__file__), "bin", "x64" if _is_64 else "x86", "VTFLib.dll")
+else:
+    raise Exception("unsupported os")
 
 _vtflib = CDLL(_library_path)
 
@@ -552,7 +558,7 @@ _vl_image_mirror_image: Callable[[Any, int, int], None] = \
 
 class VTFException(Exception):
     def __init__(self) -> None:
-        error = _vl_get_last_error().decode('mbcs')
+        error = fsdecode(_vl_get_last_error())
         super().__init__(error)
 
 
@@ -581,7 +587,7 @@ class VTFLib():
 
     @staticmethod
     def get_version_str() -> str:
-        return _vl_get_version_string().decode('mbcs')
+        return fsdecode(_vl_get_version_string())
 
     def create_image(self, width: int, height: int, frames: int = 1, faces: int = 1, slices: int = 1,
                      img_format: VTFImageFormat = VTFImageFormat.IMAGE_FORMAT_RGBA8888, thumbnail: bool = True,
@@ -596,7 +602,7 @@ class VTFLib():
         return _vl_image_is_loaded()
 
     def load_image_file(self, path: str, header_only: bool = False) -> None:
-        if not _vl_image_load(path.encode('mbcs'), header_only):
+        if not _vl_image_load(fsencode(path), header_only):
             raise VTFException
 
     def load_image_bytes(self, data: bytes, header_only: bool = False) -> None:
@@ -605,7 +611,7 @@ class VTFLib():
             raise VTFException
 
     def save_image_file(self, path: str) -> None:
-        if not _vl_image_save(path.encode('mbcs')):
+        if not _vl_image_save(fsencode(path)):
             raise VTFException
 
     def save_image_bytes(self) -> bytes:
